@@ -2,14 +2,13 @@ import React, { Component } from 'react';
 
 import ImageGalleryItem from '../ImageGalleryItem';
 
-import ApiServices from './ApiServices';
+// import ApiServices from './ApiServices';
 
 const BASE_URL = 'https://pixabay.com/api/';
 const KEY = '19101483-97eb89a6c64111aa623235b5f';
 
 let currentPage = 1;
 let perPage = 12;
-
 export default class ImageGallery extends Component {
   state = {
     images: [],
@@ -41,7 +40,9 @@ export default class ImageGallery extends Component {
   galleryGeneration = () => {
     const { images } = this.state;
 
-    return images.map(img => <ImageGalleryItem img={img} />);
+    return images.map(img => (
+      <ImageGalleryItem key={img.id} img={img.webformatURL} alt={img.tags} />
+    ));
   };
 
   render() {

@@ -1,11 +1,9 @@
 import React from 'react';
 
-export default function ImageGalleryItem({ img }) {
-  const { webformatURL, tags } = img;
-
+export default function ImageGalleryItem({ img, alt }) {
   return (
     <li className="ImageGalleryItem">
-      <img src={webformatURL} alt={tags} className="ImageGalleryItem-image" />
+      <img src={img} alt={alt} className="ImageGalleryItem-image" />
     </li>
   );
 }
