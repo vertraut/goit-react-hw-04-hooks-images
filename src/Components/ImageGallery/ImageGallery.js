@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import ImageGalleryItem from '../ImageGalleryItem';
+
 import ApiServices from './ApiServices';
 
 const BASE_URL = 'https://pixabay.com/api/';
@@ -26,7 +28,7 @@ export default class ImageGallery extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.query != this.props.query) {
+    if (prevProps.query !== this.props.query) {
       this.clearImgState();
       this.getImg(this.props.query);
     }
@@ -36,7 +38,13 @@ export default class ImageGallery extends Component {
     this.setState({ images: [] });
   };
 
+  galleryGeneration = () => {
+    const { images } = this.state;
+
+    return images.map(img => <ImageGalleryItem img={img} />);
+  };
+
   render() {
-    return <ul className="ImageGallery"></ul>;
+    return <ul className="ImageGallery">{this.galleryGeneration()}</ul>;
   }
 }

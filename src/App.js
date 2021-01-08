@@ -28,7 +28,7 @@ export default class App extends Component {
       <div className="App">
         <Searchbar onSubmit={this.setQuery} />
         <ImageGallery query={this.state.query} />
-        <p>{this.state.query}</p>
+
         <ToastContainer />
       </div>
     );
