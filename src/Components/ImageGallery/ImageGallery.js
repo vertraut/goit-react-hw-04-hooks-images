@@ -1,51 +1,105 @@
 import React, { Component } from 'react';
 
 import ImageGalleryItem from '../ImageGalleryItem';
-
-// import ApiServices from './ApiServices';
-
-const BASE_URL = 'https://pixabay.com/api/';
-const KEY = '19101483-97eb89a6c64111aa623235b5f';
-
-let currentPage = 1;
-let perPage = 12;
+import Button from '../Button';
+import apiServices from '../../Services/pixabay-api';
+import Loader from '../Loader';
 export default class ImageGallery extends Component {
   state = {
-    images: [],
+    error: null,
+    loadingMore: false,
   };
 
-  getImg(query) {
-    fetch(
-      `${BASE_URL}?q=${query}&page=${currentPage}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${perPage}`,
-    )
-      .then(r => r.json())
-      .then(images =>
-        this.setState(prevState => ({
-          images: [...prevState.images, ...images.hits],
-        })),
-      );
-  }
-
   componentDidUpdate(prevProps, prevState) {
-    if (prevProps.query !== this.props.query) {
-      this.clearImgState();
-      this.getImg(this.props.query);
+    const { changeStatus, query, currentPage } = this.props;
+    if (prevProps.query !== query) {
+      changeStatus('pending');
+      this.getImg(query);
+    }
+
+    if (prevProps.currentPage < currentPage) {
+      this.getImg(query);
     }
   }
 
-  clearImgState = () => {
-    this.setState({ images: [] });
+  scroll = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth',
+    });
   };
 
+  loadingMoreOn = () => {
+    this.setState({ loadingMore: true });
+  };
+
+  loadingMoreOff = () => {
+    this.setState({ loadingMore: false });
+  };
+
+  getImg(query) {
+    const { changeStatus, currentPage, addImages } = this.props;
+
+    setTimeout(() => {
+      apiServices(query, currentPage)
+        .then(images => {
+          addImages(images);
+          changeStatus('resolved');
+        })
+        .catch(error => {
+          this.setState({ error });
+          changeStatus('rejected');
+        })
+        .finally(() => {
+          if (this.state.loadingMore) {
+            this.scroll();
+            this.loadingMoreOff();
+          }
+        });
+    }, 1000);
+  }
+
   galleryGeneration = () => {
-    const { images } = this.state;
+    const { images } = this.props;
 
     return images.map(img => (
       <ImageGalleryItem key={img.id} img={img.webformatURL} alt={img.tags} />
     ));
   };
 
+  LoadMore = () => {
+    this.loadingMoreOn();
+    this.props.pageIncrement();
+  };
+
   render() {
-    return <ul className="ImageGallery">{this.galleryGeneration()}</ul>;
+    const { error, loadingMore } = this.state;
+    const { status } = this.props;
+
+    if (status === 'idle') {
+      return <div>Введите запрос</div>;
+    }
+
+    if (status === 'pending') {
+      return (
+        <div>
+          <Loader size={150} />
+        </div>
+      );
+    }
+
+    if (status === 'rejected') {
+      return <div>{`Возникла ошибка ${error}`}</div>;
+    }
+
+    if (status === 'resolved') {
+      return (
+        <div>
+          <ul className="ImageGallery">{this.galleryGeneration()}</ul>
+          {!loadingMore && <Button action={this.LoadMore} />}
+          {loadingMore && <Loader size={50} />}
+        </div>
+      );
+    }
   }
 }

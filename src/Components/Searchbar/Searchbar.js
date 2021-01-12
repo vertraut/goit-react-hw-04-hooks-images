@@ -14,10 +14,6 @@ export default class Searchbar extends Component {
 
   clearStateValue = () => this.setState({ value: '' });
 
-  clearStateImages() {
-    this.setState = { images: [] };
-  }
-
   handleSubmit = e => {
     e.preventDefault();
     const value = this.state.value.trim();

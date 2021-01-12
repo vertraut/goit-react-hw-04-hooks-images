@@ -180,6 +180,12 @@ img {
 /*
 * Стили компонента Buton (Load more)
 */
+
+.LoadMore {
+  text-align: center;
+  padding-top: 20px;
+}
+
 .Button {
   padding: 8px 16px;
   border-radius: 2px;
@@ -204,4 +210,9 @@ img {
 .Button:hover,
 .Button:focus {
   background-color: #303f9f;
+}
+
+.Loader {
+  text-align: center;
+  margin: 20px;
 }
