@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import Spinner from 'react-loader-spinner';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
 
@@ -16,3 +17,5 @@ export default function Loader({ size }) {
     </div>
   );
 }
+
+Loader.propTypes = { size: PropTypes.number.isRequired };

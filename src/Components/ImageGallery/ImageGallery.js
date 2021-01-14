@@ -1,13 +1,17 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import ImageGalleryItem from '../ImageGalleryItem';
 import Button from '../Button';
+import Modal from '../Modal';
 import apiServices from '../../Services/pixabay-api';
 import Loader from '../Loader';
 export default class ImageGallery extends Component {
   state = {
     error: null,
     loadingMore: false,
+    openModal: false,
+    largeImg: {},
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -40,31 +44,60 @@ export default class ImageGallery extends Component {
   getImg(query) {
     const { changeStatus, currentPage, addImages } = this.props;
 
-    setTimeout(() => {
-      apiServices(query, currentPage)
-        .then(images => {
-          addImages(images);
-          changeStatus('resolved');
-        })
-        .catch(error => {
-          this.setState({ error });
-          changeStatus('rejected');
-        })
-        .finally(() => {
-          if (this.state.loadingMore) {
-            this.scroll();
-            this.loadingMoreOff();
-          }
-        });
-    }, 1000);
+    apiServices(query, currentPage)
+      .then(images => {
+        addImages(images);
+        changeStatus('resolved');
+      })
+      .catch(error => {
+        this.setState({ error });
+        changeStatus('rejected');
+      })
+      .finally(() => {
+        if (this.state.loadingMore) {
+          this.scroll();
+          this.loadingMoreOff();
+        }
+      });
   }
+
+  toggleModal = e => {
+    this.setState(prevState => ({
+      openModal: !prevState.openModal,
+    }));
+  };
+
+  setLargeImg = (alt, img) => {
+    this.setState({ largeImg: { alt, img } });
+    this.toggleModal();
+  };
 
   galleryGeneration = () => {
     const { images } = this.props;
+    const { loadingMore } = this.state;
 
-    return images.map(img => (
-      <ImageGalleryItem key={img.id} img={img.webformatURL} alt={img.tags} />
-    ));
+    if (images.length > 0) {
+      return (
+        <>
+          <ul className="ImageGallery">
+            {images.map(img => (
+              <ImageGalleryItem
+                key={img.id}
+                img={img.webformatURL}
+                largeImg={img.largeImageURL}
+                alt={img.tags}
+                onClick={this.setLargeImg}
+              />
+            ))}
+          </ul>
+          {!loadingMore && <Button action={this.LoadMore} />}
+          {loadingMore && <Loader size={50} />}
+        </>
+      );
+    }
+    return (
+      <div className="MsgNothing">По вашему запросу ничего не найдено!</div>
+    );
   };
 
   LoadMore = () => {
@@ -73,11 +106,11 @@ export default class ImageGallery extends Component {
   };
 
   render() {
-    const { error, loadingMore } = this.state;
+    const { error, openModal, largeImg } = this.state;
     const { status } = this.props;
 
     if (status === 'idle') {
-      return <div>Введите запрос</div>;
+      return <div></div>;
     }
 
     if (status === 'pending') {
@@ -95,11 +128,28 @@ export default class ImageGallery extends Component {
     if (status === 'resolved') {
       return (
         <div>
-          <ul className="ImageGallery">{this.galleryGeneration()}</ul>
-          {!loadingMore && <Button action={this.LoadMore} />}
-          {loadingMore && <Loader size={50} />}
+          {openModal && (
+            <Modal
+              onClick={this.toggleModal}
+              src={largeImg.img}
+              alt={largeImg.alt}
+            />
+          )}
+          {this.galleryGeneration()}
         </div>
       );
     }
   }
 }
+
+ImageGallery.propTypes = {
+  query: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+  changeStatus: PropTypes.func.isRequired,
+  pageIncrement: PropTypes.func.isRequired,
+  images: PropTypes.arrayOf(
+    PropTypes.shape({ id: PropTypes.number.isRequired }),
+  ).isRequired,
+  currentPage: PropTypes.number.isRequired,
+  addImages: PropTypes.func.isRequired,
+};

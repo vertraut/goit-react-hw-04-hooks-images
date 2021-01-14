@@ -216,3 +216,9 @@ img {
   text-align: center;
   margin: 20px;
 }
+
+.MsgNothing {
+  font-size: 20px;
+  text-align: center;
+  padding: 20px;
+}

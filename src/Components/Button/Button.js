@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export default function Button({ action }) {
   return (
@@ -9,3 +10,7 @@ export default function Button({ action }) {
     </div>
   );
 }
+
+Button.propTypes = {
+  action: PropTypes.func.isRequired,
+};
