@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 
 import 'react-toastify/dist/ReactToastify.css';
@@ -6,61 +6,45 @@ import 'react-toastify/dist/ReactToastify.css';
 import Searchbar from './Components/Searchbar';
 import ImageGallery from './Components/ImageGallery';
 import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css';
-// import ImageGalleryItem from './Components/ImageGalleryItem';
-// import Loader from './Components/Loader';
-// import Modal from './Components/Modal';
 
-export default class App extends Component {
-  state = {
-    images: [],
-    currentPage: 1,
-    query: '',
-    status: 'idle',
-  };
+export default function App() {
+  const [images, setImages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState('idle');
 
-  pageIncrement = () => {
+  const pageIncrement = () => {
     //увеличивает страницу при нажатии на кнопку "показать еще"
-    this.setState(prevState => ({
-      currentPage: prevState.currentPage + 1,
-    }));
+    setCurrentPage(prevState => prevState + 1);
   };
 
-  setQuery = value => {
-    //обновляет query и ресетит images и currentPage при новом запросе
-    if (value !== this.state.query) {
-      this.setState({ query: value, images: [], currentPage: 1 });
-    }
+  const setNewQuery = newQuery => {
+    if (query === newQuery) return;
+    setCurrentPage(1);
+    setImages([]);
+    setQuery(newQuery);
   };
 
-  changeStatus = status => {
-    this.setState({ status: status });
-  };
-
-  addImages = images => {
+  const addImages = images => {
     //добавляет новые изображения в стейт с сохранением предыдущего значения
-    this.setState(prevState => ({
-      images: [...prevState.images, ...images.hits],
-    }));
+    setImages(prevState => [...prevState, ...images]);
   };
 
-  render() {
-    const { query, status, images, currentPage } = this.state;
-    return (
-      <div className="App">
-        <Searchbar onSubmit={this.setQuery} />
+  return (
+    <div className="App">
+      <Searchbar onSubmit={setNewQuery} />
 
-        <ImageGallery
-          query={query}
-          status={status}
-          changeStatus={this.changeStatus}
-          pageIncrement={this.pageIncrement}
-          images={images}
-          currentPage={currentPage}
-          addImages={this.addImages}
-        />
+      <ImageGallery
+        query={query}
+        status={status}
+        setStatus={setStatus}
+        pageIncrement={pageIncrement}
+        images={images}
+        currentPage={currentPage}
+        setImages={addImages}
+      />
 
-        <ToastContainer />
-      </div>
-    );
-  }
+      <ToastContainer />
+    </div>
+  );
 }

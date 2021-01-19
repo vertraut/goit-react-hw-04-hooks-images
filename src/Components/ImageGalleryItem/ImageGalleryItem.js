@@ -7,7 +7,7 @@ export default function ImageGalleryItem({ img, alt, onClick, largeImg }) {
         src={img}
         alt={alt}
         className="ImageGalleryItem-image"
-        onClick={() => onClick(alt, largeImg)}
+        onClick={() => onClick({ alt, largeImg })}
       />
     </li>
   );

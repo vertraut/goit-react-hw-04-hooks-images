@@ -4,6 +4,8 @@ let perPage = 12;
 
 function fetchImages(query, page) {
   const url = `${BASE_URL}?q=${query}&page=${page}&key=${KEY}&image_type=photo&orientation=horizontal&per_page=${perPage}`;
+  console.log(url);
+
   return fetch(url).then(r => {
     if (r.ok) {
       return r.json();
