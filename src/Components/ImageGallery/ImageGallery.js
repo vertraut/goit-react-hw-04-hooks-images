@@ -19,16 +19,23 @@ export default function ImageGallery({
   const [loadingMore, setLoadingMore] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [largeImg, setlargeImg] = useState({});
-
+  const [showBtnShowMore, setShowBtnShowMore] = useState(true);
   const isFirstRender = useRef(true);
+  const perPage = 12;
 
   useEffect(() => {
     //проверяем, если запрос пустой, выходим
     if (query === '') return;
     //Делаем запрос
     if (currentPage === 1) setStatus('pending');
-    apiServices(query, currentPage)
+    setShowBtnShowMore(true);
+    apiServices(query, currentPage, perPage)
       .then(images => {
+        //если число уже отображаемых картинок больше или равно общему
+        //количеству элементов по запросу, то отключаем кнопку "loadMore"
+        if (currentPage * perPage >= images.total) {
+          setShowBtnShowMore(false);
+        }
         setImages(images.hits);
         setStatus('resolved');
       })
@@ -42,7 +49,7 @@ export default function ImageGallery({
           setLoadingMore(false);
         }
       });
-  }, [query, currentPage, setStatus, setImages, loadingMore]);
+  }, [query, currentPage]);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -63,6 +70,11 @@ export default function ImageGallery({
   function toggleModal() {
     setOpenModal(prevState => !prevState);
   }
+
+  const LoadMore = () => {
+    setLoadingMore(true);
+    pageIncrement();
+  };
 
   const galleryGeneration = () => {
     const galleryMarkup = (
@@ -89,18 +101,13 @@ export default function ImageGallery({
       return (
         <>
           {galleryMarkup}
-          {images.length >= 12 && btnLoadingMoreMarkup}
+          {showBtnShowMore && btnLoadingMoreMarkup}
         </>
       );
     }
     return (
       <div className="MsgNothing">По вашему запросу ничего не найдено!</div>
     );
-  };
-
-  const LoadMore = () => {
-    setLoadingMore(true);
-    pageIncrement();
   };
 
   if (status === 'idle') {
